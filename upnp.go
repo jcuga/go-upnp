@@ -29,6 +29,7 @@ import (
 	"errors"
 	"net"
 	"net/url"
+	"strings"
 
 	"github.com/huin/goupnp"
 	"github.com/huin/goupnp/dcps/internetgateway1"
@@ -38,8 +39,8 @@ import (
 // Internet Gateway Device: discovering the external IP, and forwarding ports.
 type IGD interface {
 	ExternalIP() (string, error)
-	Forward(port uint16, description string) error
-	Clear(port uint16) error
+	Forward(port uint16, description, proto string) error
+	Clear(port uint16, proto string) error
 	Location() string
 }
 
@@ -65,28 +66,21 @@ func (u *upnpDevice) ExternalIP() (string, error) {
 //
 // TODO: is desc necessary?
 // TODO: take an int instead? More convenient.
-func (u *upnpDevice) Forward(port uint16, desc string) error {
+// EDIT: now explicitly passing in protocol to open for
+func (u *upnpDevice) Forward(port uint16, desc, proto string) error {
+	proto = strings.ToUpper(proto)
 	ip, err := u.getInternalIP()
 	if err != nil {
 		return err
 	}
-
-	err = u.client.AddPortMapping("", port, "TCP", port, ip, true, desc, 0)
-	if err != nil {
-		return err
-	}
-	return u.client.AddPortMapping("", port, "UDP", port, ip, true, desc, 0)
+	return u.client.AddPortMapping("", port, proto, port, ip, true, desc, 0)
 }
 
 // Clear un-forwards a port, removing it from the router's port mapping table.
-func (u *upnpDevice) Clear(port uint16) error {
-	tcpErr := u.client.DeletePortMapping("", port, "TCP")
-	udpErr := u.client.DeletePortMapping("", port, "UDP")
-	// only return an error if both deletions failed
-	if tcpErr != nil && udpErr != nil {
-		return tcpErr
-	}
-	return nil
+// EDIT: now passing in specific proto to clear
+func (u *upnpDevice) Clear(port uint16, proto string) error {
+	proto = strings.ToUpper(proto)
+	return u.client.DeletePortMapping("", port, proto)
 }
 
 // Location returns the URL of the router, for future lookups (see Load).
