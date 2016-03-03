@@ -13,7 +13,7 @@ mapped to the client's port 9980. This will be unacceptable for some
 purposes, but too bad. Symmetric mappings are the desired behavior 99% of
 the time, and they save a function argument.
 
-- TCP and UDP protocols are forwarded together.
+- ~~TCP and UDP protocols are forwarded together.~~ EDIT: specific protocol is forwarded.
 
 - Ports are forwarded permanently. Some other implementations lease a port
 mapping for a set duration, and then renew it periodically. This is nice,
