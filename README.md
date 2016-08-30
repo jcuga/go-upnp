@@ -49,10 +49,10 @@ func main() {
 	fmt.Println("Your external IP is:", ip)
 
 	// forward a port
-	_ = d.Forward(9001, "upnp test")
+	_ = d.Forward(9001, "upnp test", "TCP")  // EDIT: added proto arg
 
 	// un-forward a port
-	_ = d.Clear(9001)
+	_ = d.Clear(9001, "TCP")  // EDIT: added proto arg
 
 	// record router's location
 	loc := d.Location()
